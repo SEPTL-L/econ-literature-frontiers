@@ -1,9 +1,4 @@
----
-name: econ-literature-frontiers
-description: Economic and management literature frontier review workflow. Use when Codex needs to search recent English core journals, build Zotero-ready literature libraries, analyze concrete research frontiers such as ESG/greenwashing, AI/generative AI, patient capital, short-termism, climate finance, fintech, supply-chain resilience, or produce Excel/Markdown reports with representative papers and research directions.
----
-
-# Econ
+# econ-literature-frontiers
 
 Use this skill to run a repeatable literature-frontier workflow for economics, finance, management, accounting, sustainability, and adjacent social-science research.
 
