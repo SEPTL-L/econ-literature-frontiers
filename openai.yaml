@@ -1,0 +1,4 @@
+interface:
+  display_name: "Econ"
+  short_description: "Find economics research frontiers."
+  default_prompt: "检索近两年英文经济学/管理/金融核心期刊，整理具体研究前沿、代表论文、Zotero 导入文件和选题方向。"
