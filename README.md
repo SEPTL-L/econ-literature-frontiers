@@ -1,66 +1,103 @@
-# econ-literature-frontiers
+# Econ Literature Frontiers
 
-Use this skill to run a repeatable literature-frontier workflow for economics, finance, management, accounting, sustainability, and adjacent social-science research.
+一个用于经济学、金融、管理、会计与可持续发展领域文献前沿分析的 Codex Skill。
 
-## Workflow
+它的目标不是让使用者先猜一个热点词，再去做定向检索，而是先从近年英文核心期刊文献的题名、关键词和摘要中自动发现正在升温的研究前沿，再整理代表论文、时间演化、Zotero 导入文件和可能的选题方向。
 
-1. **Clarify scope**
-   - Time range, usually the last 2-5 years.
-   - Journal pool: economics core, expanded management/accounting/finance, or custom.
-   - Output target: Zotero import, Excel workbook, Markdown report, or all.
-   - Whether the user wants broad discipline mapping or concrete frontier concepts.
+## 它能做什么
 
-2. **Choose a journal and keyword configuration**
-   - Read `references/journal_pools.md` when selecting or editing journal pools.
-   - Read `references/frontier_keywords.md` when selecting or editing concrete research-frontier keywords.
-   - Prefer OpenAlex for open metadata. Use Web of Science, Scopus, EconLit, CNKI, or school databases only when the user provides exported files or authenticated access.
+- 检索近 2-5 年英文经济学、金融、管理、会计和可持续发展核心期刊文献。
+- 从题名、关键词和摘要中自动提取候选前沿词。
+- 按时间顺序观察关键词的首次出现、峰值月份和持续热度。
+- 区分长期高频主题和近期快速升温主题。
+- 输出代表论文、DOI、期刊、发表时间和引用信息。
+- 生成 Markdown 报告、Excel 表格和 Zotero 可导入文件。
+- 在需要时把文献题录导入 Zotero 的指定集合。
 
-3. **Fetch metadata**
-   - Use `scripts/fetch_expanded_frontier_pool.py` for OpenAlex journal-pool searches.
-   - Outputs are CSV files under `outputs/` relative to the skill folder.
-   - Expected fields: title, authors, journal, publication date, DOI, URL, citation count, keywords, abstract, frontier hits.
+## 核心思路
 
-4. **Import into Zotero only after confirming the target collection**
-   - If Zotero is involved, use the Zotero skill/tooling first.
-   - Always verify the selected collection before importing.
-   - Prefer importing RIS chunks into a new collection, not the user’s active working collection.
-   - Treat Zotero writes as explicit library modifications.
+这个 skill 采用两阶段流程：
 
-5. **Analyze concrete frontiers**
-   - Use `scripts/analyze_expanded_frontiers.py` after metadata is fetched.
-   - Distinguish direct concepts from adjacent concepts:
-     - Direct: terms appear in title/abstract, e.g. `greenwashing`, `generative AI`, `managerial myopia`.
-     - Adjacent: terms do not appear directly but can be operationalized, e.g. `patient capital` via investor horizon, debt maturity, fund flow pressure.
-   - Do not report only broad fields like “finance” or “labor economics” when the user asks what scholars are recently doing.
+第一阶段是自动发现。  
+它先建立一个文献池，然后从题名、关键词和摘要中提取 2-5 词短语，并根据出现频率、近期增长、题名显著性、跨期刊扩散和引用信号排序。
 
-6. **Generate deliverables**
-   - Use `scripts/build_expanded_frontier_workbook.mjs` to build a workbook from `work/expanded_concrete_frontier_workbook_data.json`.
-   - If using the spreadsheet runtime, follow the Spreadsheets skill: load workspace dependencies, symlink `node_modules`, export `.xlsx`, and visually verify key sheets.
-   - Also provide a Markdown report when the user wants readable synthesis.
+第二阶段是解释和校准。  
+自动发现的词并不直接等于最终研究主题，还需要合并同义词、剔除方法词和过宽泛词，并结合代表论文判断它们是否构成可推进的研究前沿。
 
-## Output Standards
+也就是说，`AI washing`、`patient capital`、`greenwashing` 这类词可以作为后续校准或补查对象，但不应该是第一步筛选的前提。
 
-For concrete-frontier reports, include:
+## 适合的使用场景
 
-- Frontiers ranked by hit count and recent share.
-- Direct concept counts.
-- Representative papers with journal, date, DOI, and citation count where available.
-- A short explanation of whether a term is already established or still an adjacent/emerging construct.
-- Practical research directions: research question, possible variables, data source, and identification strategy when useful.
+- 想了解近两年英文核心期刊正在研究什么。
+- 想为课程论文、毕业论文或开题报告寻找前沿选题。
+- 想把一批文献导入 Zotero，并进一步筛选代表论文。
+- 想比较不同研究主题的时间演化，例如哪些词是长期热点，哪些词是最近才出现。
+- 想从文献语料中自动发现具体议题，而不是只得到“金融”“劳动经济学”“公司治理”这类宽泛分类。
 
-## Interpretation Rules
+## 推荐调用方式
 
-- Be explicit about database limits. OpenAlex metadata is useful for discovery but not a substitute for Web of Science/Scopus indexing decisions.
-- Filter non-research records such as editorial boards, front matter, referee lists, calls for papers, annual reports, and corrections.
-- Avoid overclaiming novelty from raw frequency. A term with few direct hits may still be a good research opportunity if adjacent constructs are active.
-- If a user asks for examples like “AI washing” or “patient capital,” search both the exact term and operational neighbors.
+在 Codex 中可以这样说：
 
-## Bundled Resources
+```text
+使用 econ skill，检索近两年英文经济学、管理、金融和会计核心期刊，自动发现研究前沿，并输出 Markdown、Excel 和 Zotero 导入文件。
+```
 
-- `scripts/fetch_expanded_frontier_pool.py`: OpenAlex metadata fetcher for expanded journal pools and frontier keyword hits.
-- `scripts/analyze_expanded_frontiers.py`: concrete-frontier analyzer that produces CSV, JSON, and Markdown outputs.
-- `scripts/build_expanded_frontier_workbook.mjs`: workbook builder for final Excel output.
-- `scripts/import_ris_chunks_to_selected_zotero.py`: helper pattern for importing RIS chunks into the currently selected Zotero collection after verification.
-- `references/journal_pools.md`: editable journal-pool guidance.
-- `references/frontier_keywords.md`: editable keyword and concept guidance.
-- `references/workflow.md`: detailed implementation notes and common pitfalls.
+或者：
+
+```text
+使用 econ skill，基于近五年英文管理和金融核心期刊，自动提取前沿关键词，按时间顺序整理其出现和升温过程，并给出可继续研究的方向。
+```
+
+如果你不想指定具体主题，可以直接说：
+
+```text
+使用 econ skill，帮我自动发现近期英文经济管理核心期刊的研究热点。
+```
+
+## 需要你提供什么
+
+通常只需要提供三个范围：
+
+- 时间范围：例如近 2 年、近 5 年，或指定起止日期。
+- 期刊池：经济学核心、管理/金融/会计扩展池，或你自己给定的期刊列表。
+- 输出格式：Markdown、Excel、Zotero 导入文件，或全部。
+
+不需要一开始就指定具体热点词。  
+具体热点词应该由文献池自动提取出来，再由人和模型一起解释。
+
+## 主要输出
+
+运行后通常会得到以下文件：
+
+- `*_pool.csv`：完整文献池。
+- `discovered_frontier_terms.csv`：自动发现的候选前沿词，按综合得分排序。
+- `discovered_frontier_terms_chronological.csv`：候选前沿词，按首次出现时间排序。
+- `discovered_frontier_term_timeline.csv`：候选前沿词的月度出现次数。
+- `discovered_frontier_clusters.csv`：相关候选词的轻量聚类结果。
+- `*_representatives.csv`：各前沿方向的代表论文。
+- `*.md`：可阅读的中文分析报告。
+- `*.xlsx`：便于筛选、汇报和继续整理的 Excel 工作簿。
+- `*.ris`：可导入 Zotero 的文献题录文件。
+
+## 与 Zotero 的关系
+
+这个 skill 默认先导入文献题录，而不是直接下载 PDF。
+
+原因是一次性处理几千篇文献时，先建立题录库更稳妥，也更适合做前沿识别。PDF 更适合在筛出代表论文或重点阅读清单后，再针对少量核心文献补充。
+
+导入 Zotero 前应先确认目标集合，最好新建一个专门集合，避免把文献误放入已有论文或课程项目集合。
+
+
+
+## 注意事项
+
+- OpenAlex 适合做开放元数据发现，但不能完全替代 Web of Science、Scopus 或学校数据库的正式检索。
+- 自动发现的候选词需要进一步解释，不应把原始频次直接等同于研究前沿。
+- 某些词可能是方法词、数据库噪声或过宽泛概念，需要在报告阶段剔除。
+- 如果需要做严谨综述，建议在自动发现后再回到 Web of Science、Scopus、EconLit 等数据库复核。
+
+## 当前定位
+
+这个 skill 更适合作为文献前沿探索工具，而不是最终论文写作机器。
+
+它负责帮你快速建立文献池、识别近期升温词、整理代表论文和提出可能方向。真正的理论判断、变量设计、识别策略和论文创新点，还需要结合你的学科背景和导师要求继续打磨。
